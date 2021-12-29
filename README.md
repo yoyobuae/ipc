@@ -1,20 +1,68 @@
-# Compiling
+# IPC Library
+
+Inter-process communication library.
+
+Simple library meant to be a drop-in replacement for Windows NamedPipes
+providing cross-platform compatibility between Linux and Windows.
+
+## Compiling
 
 - `git clone https://github.com/yoyobuae/ipc.git`
 - `cd ipc`
 - `cmake -B build`
 - `cmake --build build`
 
-# Test program
-
 After compiling run test program with:
 - `./build/tests/ipc_test`
 
-# Usage
+## Usage
 
-Check test program for example of usage
+Create server, wait for connection, receive message from client and echo
+the same message back to client:
 
-# License
+```cpp
+bool success = false;
+char buffer[20];
+size_t bytesReceived;
+size_t bytesSent;
+Ipc::Server server;
+
+server.init("Example");
+
+Ipc::Connection connection = server.accept();
+
+if (connection.isInvalid() == false) {
+    success = connection.recv(buffer, 20, &bytesReceived);
+}
+
+if (success) {
+    success = connection.send(buffer, bytesReceived, &bytesSent)
+}
+```
+
+Create client, connect to server, send message and receive server response:
+```cpp
+bool success = false;
+char buffer[20];
+size_t bytesReceived;
+size_t bytesSent;
+
+Ipc::Client client("Example");
+
+Ipc::Connection connection = client.connect();
+
+if (connection.isInvalid() == false) {
+    success = connection.send("foobar", strlen("foobar") + 1, &bytesSent);
+}
+
+if (success) {
+    success = connection.recv(buffer, 20, &bytesReceived);
+}
+```
+
+Check test programs for more examples of usage.
+
+## License
 
 All files in this repo are covered under MIT License:
 
